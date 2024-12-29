@@ -1,4 +1,4 @@
-#include "SFMLStub.h"
+#include "Starfield.h"
 
 #include <string>
 
@@ -7,18 +7,18 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
-SFMLStub::SFMLStub(const std::string& title,
-                   GameData&          gameData) : title(title),
-                                                  gameData(gameData) {
+Starfield::Starfield(const std::string& title,
+                     GameData&          gameData) : title(title),
+                                                    gameData(gameData) {
 }
 
-SFMLStub::~SFMLStub() {
+Starfield::~Starfield() {
   if (window != nullptr) {
     stop();
   }
 }
 
-void SFMLStub::run() {
+void Starfield::run() {
   window = new sf::RenderWindow(sf::VideoMode::getFullscreenModes()[0], title, sf::Style::Fullscreen);
 
   // sf::View view = window->getDefaultView();
@@ -26,6 +26,8 @@ void SFMLStub::run() {
   // window->setView(view);
 
   sf::Event event;
+
+  shouldStop = false;
 
   while ((window->isOpen()) && (!shouldStop)) {
     while (window->pollEvent(event)) {
@@ -40,18 +42,16 @@ void SFMLStub::run() {
   }
 
   delete window;
-
-  shouldStop = false;
 }
 
-void SFMLStub::stop() {
+void Starfield::stop() {
   shouldStop = true;
 }
 
-void SFMLStub::draw(const GameData& data) {
-  data.draw(*window);
+bool Starfield::isStopped() {
+  return shouldStop;
 }
 
-void SFMLStub::addEventHandler(EventHandler* eventHandler) {
+void Starfield::addEventHandler(EventHandler* eventHandler) {
   this->eventHandler = eventHandler;
 }

@@ -7,20 +7,20 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
-class SFMLStub {
+class Starfield {
  public:
-  SFMLStub(const std::string& title,
-           GameData& gameData);
+  Starfield(const std::string& title,
+            GameData& gameData);
 
-  ~SFMLStub();
+  ~Starfield();
 
   void run();
-
-  void draw(const GameData& data);
 
   void addEventHandler(EventHandler* eventHandler);
 
   void stop();
+
+  bool isStopped();
 
  private:
   const std::string title;
