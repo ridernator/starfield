@@ -71,15 +71,21 @@ class GD : public GameData {
   void draw(sf::RenderWindow& window) override {
     mutex.lock();
 
-    sf::VertexArray vertexArray(sf::PrimitiveType::Triangles, 3 * NUM_STARS);
+    sf::VertexArray vertexArray(sf::PrimitiveType::Triangles, 6 * NUM_STARS);
 
     for (std::size_t index = 0; index < NUM_STARS; ++index) {
-      vertexArray[index * 3 + 0].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
-      vertexArray[index * 3 + 0].color = stars[index]->colour;
-      vertexArray[index * 3 + 1].position = sf::Vector2f(stars[index]->currentX, stars[index]->currentY + (stars[index]->currentSize * 0.5));
-      vertexArray[index * 3 + 1].color = stars[index]->colour;
-      vertexArray[index * 3 + 2].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
-      vertexArray[index * 3 + 2].color = stars[index]->colour;
+      vertexArray[index * 6 + 0].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 0].color = stars[index]->colour;
+      vertexArray[index * 6 + 1].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY + (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 1].color = stars[index]->colour;
+      vertexArray[index * 6 + 2].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY + (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 2].color = stars[index]->colour;
+      vertexArray[index * 6 + 3].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY + (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 3].color = stars[index]->colour;
+      vertexArray[index * 6 + 4].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 4].color = stars[index]->colour;
+      vertexArray[index * 6 + 5].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
+      vertexArray[index * 6 + 5].color = stars[index]->colour;
     }
 
     mutex.unlock();
