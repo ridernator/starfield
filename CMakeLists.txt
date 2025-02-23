@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(SFML COMPONENTS graphics window system REQUIRED)
+find_package(SFML COMPONENTS Graphics Window System REQUIRED)
 
 project(starfield VERSION 1.0)
 add_compile_options(-Wall -Wextra -pedantic -O3)

@@ -3,6 +3,8 @@
 #include <SFML/Graphics/PrimitiveType.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <algorithm>
 #include <array>
@@ -27,22 +29,6 @@ struct Star {
   sf::Color colour;
 };
 
-class EV : public EventHandler {
- public:
-  EV(Starfield& starfield) : starfield(starfield) {}
-
-  void newEvent(const sf::Event& event) override {
-    if (event.type == sf::Event::KeyReleased) {
-      if (event.key.code == sf::Keyboard::Escape) {
-        starfield.stop();
-      }
-    }
-  }
-
- private:
-  Starfield& starfield;
-};
-
 class GD : public GameData {
  public:
   GD() {
@@ -50,8 +36,8 @@ class GD : public GameData {
 
     for (auto& star : stars) {
       star = new Star();
-      star->currentX = std::rand() % sf::VideoMode::getFullscreenModes()[0].width;
-      star->currentY = std::rand() % sf::VideoMode::getFullscreenModes()[0].height;
+      star->currentX = std::rand() % sf::VideoMode::getFullscreenModes()[0].size.x;
+      star->currentY = std::rand() % sf::VideoMode::getFullscreenModes()[0].size.y;
       star->colour = sf::Color((std::uint8_t) (std::rand() % 255),
                                (std::uint8_t) (std::rand() % 255),
                                (std::uint8_t) (std::rand() % 255),
@@ -62,21 +48,19 @@ class GD : public GameData {
   }
 
   void update() {
-    float increment = 0.01;
-
     mutex.lock();
 
     for (auto& star : stars) {
-      star->currentX += (star->currentX - sf::VideoMode::getFullscreenModes()[0].width * 0.5) * increment;
-      star->currentY += (star->currentY - sf::VideoMode::getFullscreenModes()[0].height * 0.5) * increment;
+      star->currentX += (star->currentX - sf::VideoMode::getFullscreenModes()[0].size.x * 0.5) * xIncrement;
+      star->currentY += (star->currentY - sf::VideoMode::getFullscreenModes()[0].size.y * 0.5) * yIncrement;
       star->currentSize = std::min(star->currentSize * 1.01, (double) MAX_SIZE);
 
       if ((star->currentX < 0 - (star->currentSize * 0.5)) ||
-          (star->currentX > sf::VideoMode::getFullscreenModes()[0].width + (star->currentSize * 0.5)) ||
+          (star->currentX > sf::VideoMode::getFullscreenModes()[0].size.x + (star->currentSize * 0.5)) ||
           (star->currentY < 0 - (star->currentSize * 0.5)) ||
-          (star->currentY > sf::VideoMode::getFullscreenModes()[0].height + (star->currentSize * 0.5))) {
-        star->currentX = std::rand() % sf::VideoMode::getFullscreenModes()[0].width;
-        star->currentY = std::rand() % sf::VideoMode::getFullscreenModes()[0].height;
+          (star->currentY > sf::VideoMode::getFullscreenModes()[0].size.y + (star->currentSize * 0.5))) {
+        star->currentX = std::rand() % sf::VideoMode::getFullscreenModes()[0].size.x;
+        star->currentY = std::rand() % sf::VideoMode::getFullscreenModes()[0].size.y;
         star->currentSize = star->startSize;
       }
     }
@@ -87,17 +71,15 @@ class GD : public GameData {
   void draw(sf::RenderWindow& window) override {
     mutex.lock();
 
-    sf::VertexArray vertexArray(sf::PrimitiveType::Quads, 4 * NUM_STARS);
+    sf::VertexArray vertexArray(sf::PrimitiveType::Triangles, 3 * NUM_STARS);
 
     for (std::size_t index = 0; index < NUM_STARS; ++index) {
-      vertexArray[index * 4 + 0].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
-      vertexArray[index * 4 + 0].color = stars[index]->colour;
-      vertexArray[index * 4 + 1].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY + (stars[index]->currentSize * 0.5));
-      vertexArray[index * 4 + 1].color = stars[index]->colour;
-      vertexArray[index * 4 + 2].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY + (stars[index]->currentSize * 0.5));
-      vertexArray[index * 4 + 2].color = stars[index]->colour;
-      vertexArray[index * 4 + 3].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
-      vertexArray[index * 4 + 3].color = stars[index]->colour;
+      vertexArray[index * 3 + 0].position = sf::Vector2f(stars[index]->currentX - (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
+      vertexArray[index * 3 + 0].color = stars[index]->colour;
+      vertexArray[index * 3 + 1].position = sf::Vector2f(stars[index]->currentX, stars[index]->currentY + (stars[index]->currentSize * 0.5));
+      vertexArray[index * 3 + 1].color = stars[index]->colour;
+      vertexArray[index * 3 + 2].position = sf::Vector2f(stars[index]->currentX + (stars[index]->currentSize * 0.5), stars[index]->currentY - (stars[index]->currentSize * 0.5));
+      vertexArray[index * 3 + 2].color = stars[index]->colour;
     }
 
     mutex.unlock();
@@ -105,9 +87,55 @@ class GD : public GameData {
     window.draw(vertexArray);
   }
 
+  void plusX() {
+    xIncrement += 0.01;
+  }
+
+  void minusX() {
+    xIncrement -= 0.01;
+  }
+
+  void plusY() {
+    yIncrement += 0.01;
+  }
+
+  void minusY() {
+    yIncrement -= 0.01;
+  }
+
  private:
   std::array<Star*, NUM_STARS> stars;
   std::mutex mutex;
+  float xIncrement = 0.01;
+  float yIncrement = 0.01;
+};
+
+class EV : public EventHandler {
+ public:
+  EV(Starfield& starfield,
+     GD& gd) : starfield(starfield),
+               gd(gd) {}
+
+  void newEvent(const sf::Event& event) override {
+    if (event.is<sf::Event::KeyReleased>()) {
+      const sf::Event::KeyReleased* krEvent = event.getIf<sf::Event::KeyReleased>();
+      if (krEvent->code == sf::Keyboard::Key::Escape) {
+        starfield.stop();
+      } else if (krEvent->code == sf::Keyboard::Key::Right) {
+        gd.plusX();
+      } else if (krEvent->code == sf::Keyboard::Key::Left) {
+        gd.minusX();
+      } else if (krEvent->code == sf::Keyboard::Key::Up) {
+        gd.plusY();
+      } else if (krEvent->code == sf::Keyboard::Key::Down) {
+        gd.minusY();
+      }
+    }
+  }
+
+ private:
+  Starfield& starfield;
+  GD& gd;
 };
 
 int main(const int    argc,
@@ -116,7 +144,7 @@ int main(const int    argc,
 
   Starfield starfield("starfield", gd);
 
-  EV ev(starfield);
+  EV ev(starfield, gd);
   starfield.addEventHandler(&ev);
 
   std::thread thread([&starfield] {
